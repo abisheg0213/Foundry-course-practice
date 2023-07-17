@@ -1,5 +1,5 @@
 pragma solidity ^0.8.14;
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol"; 
 contract FundMe
 {
     address [] public funders;
@@ -9,27 +9,27 @@ contract FundMe
     {
         owner=payable(msg.sender);
     }
-    uint public minimum_usd=5;
-    function fund() public payable {
-        require(msg.value >= getconversion(),"Required amount not given");
+
+    function fund() public payable 
+    {
+        require(getConversion(msg.value)>=min_usd,"Required amount is not given");
         funders.push(msg.sender);
         amountfunded[msg.sender]+=msg.value;
+
     }
-    function withdraw() public{
+     function withdraw() public{
         uint balance=address(this).balance;
         owner.transfer(balance);
     }
-    //0x694AA1769357215DE4FAC081bf1f309aDC325306
-    function getPrice() public view returns (int)
+    uint min_usd=5*1e18;
+    function getPrice() view public returns(uint)
     {
         AggregatorV3Interface instance=AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
-        (,int256 price,,,)=instance.latestRoundData();
-        return price;
+        (,int price,,,)=instance.latestRoundData();
+        return uint(price*1e10);
     }
-    function getconversion() public view returns (uint256)
+    function getConversion(uint ethamount) public view returns  (uint)
     {
-        uint val=uint256(getPrice());
-        uint res=(minimum_usd*(1e18))/val;
-        return res;
+        return (ethamount*getPrice())/1e18;
     }
 }
